@@ -33,7 +33,7 @@ then
         exit $status
 fi 
 
-while sleep 60; do
+while sleep 20; do
   ps aux |grep apache2 |grep -q -v grep
   PROCESS_1_STATUS=$?
   ps aux |grep vsftpd |grep -q -v grep
@@ -46,4 +46,5 @@ while sleep 60; do
     echo "One of the processes has already exited."
     exit 1
   fi
+  mysqld --user=root
 done
