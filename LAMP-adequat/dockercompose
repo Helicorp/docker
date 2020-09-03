@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+	mysql:
+		container_name: mysql_phpxkibana
+		expose:
+			- 3306:52004
+		networks:
+			- phpxkibana:
+				ipv4_address: 172.19.0.2
+		environment:
+			- MYSQL_ROOT_PASSWORD=root
+		build:
+			context: ./mysql
+			dockerfile: mysql
+
+	php:
+		container_name: php_phpxkibana
+		expose:
+			- 80:8081
+			- 20-22:23-25
+			- 65500-65515:65500-65515
+		networks:
+			- phpxkibana
+		build:
+			context: ./apache-php
+			dockerfile: LAP
+		depends_on:
+			- mysql_phpxkibana
+	networks:
+		phpxkibana:
+		ipam:
+			config:
+				- subnet : 172.19.0.0/29
+				- gateway : 172.19.0.1

@@ -1,0 +1,32 @@
+# installation a partir de l'image de mysql
+
+FROM mysql:latest
+
+# message de bienvenue
+
+RUN echo "Bienvenue dans l'outil de création de limage mysql" \
+&& echo "powered by" \
+&& echo "__/\\\________/\\\________/\\\\\\\\\_        " \
+&& echo " _\/\\\_______\/\\\_____/\\\////////__       " \
+&& echo "  _\/\\\_______\/\\\___/\\\/___________      " \
+&& echo "   _\/\\\\\\\\\\\\\\\__/\\\_____________     " \
+&& echo "    _\/\\\/////////\\\_\/\\\_____________    " \
+&& echo "     _\/\\\_______\/\\\_\//\\\____________   " \
+&& echo "      _\/\\\_______\/\\\__\///\\\__________  " \
+&& echo "       _\/\\\_______\/\\\____\////\\\\\\\\\_ " \
+&& echo "        _\///________\///________\/////////__" \
+&& sleep 5
+
+# copie des fichier de configuration
+
+COPY omeka-s.sql omeka-s.sql
+COPY create_user.sql create_user.sql
+
+# ouverture des ports
+
+EXPOSE 3306
+
+# Lancement du script de creation de omeka et ajout de l'utilisateur admin
+
+RUN mysql -u root -p root < omeka-s.sql \
+&& mysql -u root -p root < create_user.sql

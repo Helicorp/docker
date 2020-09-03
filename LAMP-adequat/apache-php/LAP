@@ -1,0 +1,56 @@
+# installation a partir de l'image de debian
+
+FROM debian:latest
+
+# message de bienvenue
+
+RUN echo "Bienvenue dans l'outil de création de limage LAP" \
+&& echo "powered by" \
+&& echo "__/\\\________/\\\________/\\\\\\\\\_        " \
+&& echo " _\/\\\_______\/\\\_____/\\\////////__       " \
+&& echo "  _\/\\\_______\/\\\___/\\\/___________      " \
+&& echo "   _\/\\\\\\\\\\\\\\\__/\\\_____________     " \
+&& echo "    _\/\\\/////////\\\_\/\\\_____________    " \
+&& echo "     _\/\\\_______\/\\\_\//\\\____________   " \
+&& echo "      _\/\\\_______\/\\\__\///\\\__________  " \
+&& echo "       _\/\\\_______\/\\\____\////\\\\\\\\\_ " \
+&& echo "        _\///________\///________\/////////__" \
+&& sleep 5
+
+# installation des packets et creation des repertoires et fichier de logs
+
+RUN apt-get update -yq \
+&& sleep 10 \
+&& apt-get install curl gnupg -yq \
+&& apt-get install apache2 -yq \
+&& apt-get install php -yq \
+&& apt-get install nano -yq \
+&& apt-get install vsftpd -yq \
+&& apt-get install php-mysql -yq \
+&& apt-get install php-xml -yq \
+&& apt-get install php-mbstring -yq \
+&& export DEBIAN_FRONTEND=noninteractive \
+&& apt-get clean -y \
+&& mkdir /var/log/vsftpd && touch /var/log/vsftpd/error.log \
+&& mkdir /var/log/cron && touch /var/log/cron/error.log
+
+# copie des fichier de configuration
+
+COPY apache2.conf etc/apache2/
+COPY startup.sh startup.sh
+COPY phpxkibana /var/www/html/
+
+# modification des droits du fichier
+
+RUN chown -R www_data /var/www/html/phpxkibana /
+&& chmod -R 755 /var/www/html/phpxkibana
+
+# ouverture des ports
+
+EXPOSE 80
+EXPOSE 20-22
+EXPOSE 65500-65515
+
+# demande d'autostart des packets
+
+CMD chmod 777 /startup.sh && /startup.sh
