@@ -1,0 +1,58 @@
+# installation a partir de l'image debian
+
+FROM debian:latest
+
+# message de bienvenue
+
+RUN echo "Bienvenue dans l'outil de création de l'image ElasticGalax" \
+&& echo "powered by" \
+&& echo "__/\\\________/\\\________/\\\\\\\\\_        " \
+&& echo " _\/\\\_______\/\\\_____/\\\////////__       " \
+&& echo "  _\/\\\_______\/\\\___/\\\/___________      " \
+&& echo "   _\/\\\\\\\\\\\\\\\__/\\\_____________     " \
+&& echo "    _\/\\\/////////\\\_\/\\\_____________    " \
+&& echo "     _\/\\\_______\/\\\_\//\\\____________   " \
+&& echo "      _\/\\\_______\/\\\__\///\\\__________  " \
+&& echo "       _\/\\\_______\/\\\____\////\\\\\\\\\_ " \
+&& echo "        _\///________\///________\/////////__" \
+&& sleep 5
+
+# Ouverture des ports
+
+EXPOSE 9200
+EXPOSE 9300
+EXPOSE 9600
+EXPOSE 5601
+EXPOSE 9700
+
+# installation de tous les packet necessaire
+
+RUN apt-get update -yq \
+&& export DEBIAN_FRONTEND=noninteractive \
+&& sleep 5 \
+&& apt-get install -y --no-install-recommends apt-utils \
+&& apt-get install apt-transport-https -yq \
+&& apt-get install ca-certificates -yq \
+&& apt-get install wget -yq \
+&& apt-get install curl -yq \
+&& apt-get install -y gnupg2 \
+&& apt-get install nano -yq \
+&& apt-get install openjdk-11-jdk -yq \
+&& APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key exportall > ~/Repo.asc \
+&& wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add - \
+&& echo "deb [trusted=yes] https://artifacts.elastic.co/packages/7.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-7.x.list \
+&& apt-get install -y procps -yq \
+&& apt-get update -yq \
+&& apt-get install elasticsearch -yq \
+&& apt-get install kibana -yq \
+&& apt-get install logstash -yq \
+&& apt-get clean -y
+
+COPY kibana.yml /etc/kibana
+COPY elasticsearch.yml /etc/elasticsearch
+
+RUN chmod 777 /etc/kibana/kibana.yml && chmod 777 /etc/elasticsearch/elasticsearch.yml 
+
+# Script utilisé a chaque démarrage du conteneur
+
+CMD while sleep 20; do echo "OK"; done
