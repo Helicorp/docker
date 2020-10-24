@@ -29,6 +29,8 @@ RUN apt-get update -yq \
 && apt-get install php-mysql -yq \
 && apt-get install php-xml -yq \
 && apt-get install php-mbstring -yq \
+&& apt-get install php-curl -yq \
+&& apt-get install php-zip -yq \
 && export DEBIAN_FRONTEND=noninteractive \
 && apt-get clean -y \
 && mkdir /var/log/vsftpd && touch /var/log/vsftpd/error.log \
@@ -36,14 +38,12 @@ RUN apt-get update -yq \
 
 # copie des fichier de configuration
 
-COPY apache2.conf etc/apache2/
 COPY startup.sh startup.sh
 COPY gestion /var/www/html/
 
 # modification des droits du fichier
 
-RUN chown -R www_data /var/www/html/gestion /
-&& chmod -R 755 /var/www/html/gestion
+#RUN chmod -R 755 /var/www/html/gestion
 
 # ouverture des ports
 

@@ -71,9 +71,9 @@ if(file_put_contents( $file_name,file_get_contents($url)))
 				
                 $cart = array('Type' => 'prix', 'ville' => (string)$carburant->ville, 'id' => (string)$carburant['id'], 'adresse' => (string)$carburant->adresse, 'prix' => (double)$prix['valeur'], 'Carburant' => (string)$prix['nom'], 'Service' => (array)$carburant->services->service, 'Relever' => $Relever->format('Y-m-d') . 'T' . $Relever->format('H:i:s'), 'longitude' => (string)$carburant['longitude']/100000, 'latitude' => (string)$carburant['latitude']/100000, 'location' => array("lat" => (string)$carburant['latitude']/100000, "lon" => (string)$carburant['longitude']/100000));
                 //}
-                echo '<br>';
+                /*echo '<br>';
                 print_r($cart);
-                echo '<br>';
+                echo '<br>';*/
                 $baseUrl = "http://11.5.0.6:9200/carburant-$date/_doc/";
 
                 $jsonData = json_encode($cart);

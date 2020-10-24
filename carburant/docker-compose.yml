@@ -4,7 +4,7 @@ services:
 
   elasticsearch:
       image: elasticsearch:7.9.1
-      container_name: elasticsearch
+      container_name: carburant_elasticsearch
       environment:
         - node.name=es01
         - cluster.name=es-docker-cluster
@@ -30,7 +30,7 @@ services:
 
   kibana:
     image: kibana:7.9.1
-    container_name: kibana
+    container_name: carburant_kibana
     environment:
         - elasticsearch_url=http://11.5.0.6:9200
         - elasticsearch_hosts=http://11.5.0.6:9200
@@ -39,36 +39,39 @@ services:
       - 5601
     ports:
       - "5601:5601"
-      networks:
+    networks:
         elasticgalax:
           ipv4_address: 11.5.0.7
     depends_on:
       - elasticsearch
       
   mysql:
-    container_name: mysql_phpxkibana
+    image : mysql
+    container_name: carburant_mysql
     expose:
-        - 3306:52004
-      networks:
+        - 3306
+    ports:
+        - "52004"
+    networks:
         elasticgalax:
           ipv4_address: 11.5.0.4
     environment:
         - MYSQL_ROOT_PASSWORD=root
 
   php:
-    container_name: php_phpxkibana
+    container_name: carburant_php
     expose:
-       - 80:8081
-       - 20-22:23-25
-       - 65500-65515:65500-65515
-      networks:
+       - 80
+    ports:
+       - "80:80"
+    networks:
         elasticgalax:
-          ipv4_address: 11.5.0.4
+          ipv4_address: 11.5.0.3
     build:
        context: ./apache-php
        dockerfile: LAP
     depends_on:
-      - mysql_phpxkibana
+      - mysql
 
 volumes:
   esdata1:
