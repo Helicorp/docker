@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+
+  elasticsearch:
+      image: elasticsearch:7.9.1
+      container_name: elasticsearch
+      environment:
+        - node.name=es01
+        - cluster.name=es-docker-cluster
+        - cluster.initial_master_nodes=es01
+        - bootstrap.memory_lock=true
+        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      restart: always
+      expose:
+        - 9300
+        - 9200
+      ulimits:
+        memlock:
+          soft: -1
+          hard: -1
+      volumes:
+       - esdata1:/usr/share/elasticsearch/data
+      ports:
+        - "9300:9300"
+        - "9200:9200"
+      networks:
+        elasticgalax:
+          ipv4_address: 11.5.0.6
+
+  kibana:
+    image: kibana:7.9.1
+    container_name: kibana
+    environment:
+        - elasticsearch_url=http://11.5.0.6:9200
+        - elasticsearch_hosts=http://11.5.0.6:9200
+    restart: always 
+    expose:
+      - 5601
+    ports:
+      - "5601:5601"
+      networks:
+        elasticgalax:
+          ipv4_address: 11.5.0.7
+    depends_on:
+      - elasticsearch
+      
+  mysql:
+    container_name: mysql_phpxkibana
+    expose:
+        - 3306:52004
+      networks:
+        elasticgalax:
+          ipv4_address: 11.5.0.4
+    environment:
+        - MYSQL_ROOT_PASSWORD=root
+
+  php:
+    container_name: php_phpxkibana
+    expose:
+       - 80:8081
+       - 20-22:23-25
+       - 65500-65515:65500-65515
+      networks:
+        elasticgalax:
+          ipv4_address: 11.5.0.4
+    build:
+       context: ./apache-php
+       dockerfile: LAP
+    depends_on:
+      - mysql_phpxkibana
+
+volumes:
+  esdata1:
+    driver: local
+      
+networks:
+    elasticgalax:
+        ipam:
+            driver: default
+            config:
+                 - subnet: 11.5.0.0/24
