@@ -9,8 +9,6 @@ services:
         - node.name=es01
         - cluster.name=es-docker-cluster
         - cluster.initial_master_nodes=es01
-        - bootstrap.memory_lock=true
-        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       restart: always
       expose:
         - 9300
@@ -48,6 +46,7 @@ services:
   mysql:
     image : mysql
     container_name: carburant_mysql
+    restart: always
     expose:
         - 3306
     ports:
@@ -60,6 +59,7 @@ services:
 
   php:
     container_name: carburant_php
+    restart: always
     expose:
        - 80
     ports:
