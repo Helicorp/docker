@@ -34,11 +34,11 @@ then
 fi 
 
 while sleep 20; do
-  ps aux |grep apache2 |grep -q -v grep
+  service apache2 status
   PROCESS_1_STATUS=$?
-  ps aux |grep vsftpd |grep -q -v grep
+  service vsftpd status
   PROCESS_2_STATUS=$?
-  ps aux |grep cron |grep -q -v grep
+  service cron status
   PROCESS_3_STATUS=$?
   # If the greps above find anything, they exit with 0 status
   # If they are not both 0, then something is wrong
