@@ -1,95 +1,87 @@
 version: '3'
+
 services:
+
   elasticsearch:
-    image: 'elasticsearch:7.9.1'
-    container_name: carburant_elasticsearch
-    environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-    restart: always
-    expose:
-      - 9300
-      - 9200
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - 'esdata1:/usr/share/elasticsearch/data'
-    ports:
-      - '9300:9300'
-      - '9200:9200'
-    networks:
-      elasticgalax:
-        ipv4_address: 11.5.0.6
+      image: elasticsearch:7.10.1
+      container_name: carburant_elasticsearch
+      environment:
+        - node.name=es01
+        - cluster.name=es-docker-cluster
+        - cluster.initial_master_nodes=es01
+        - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      restart: always
+      expose:
+        - 9300
+        - 9200
+      ulimits:
+        memlock:
+          soft: -1
+          hard: -1
+      volumes:
+       - 'esdata1:/usr/share/elasticsearch/data'
+      ports:
+        - "9300:9300"
+        - "9200:9200"
+      networks:
+        elasticgalax:
+          ipv4_address: 11.5.0.6
+
   kibana:
-    image: 'kibana:7.9.1'
+    image: kibana:7.10.1
     container_name: carburant_kibana
     environment:
-      - 'elasticsearch_url=http://11.5.0.6:9200'
-      - 'elasticsearch_hosts=http://11.5.0.6:9200'
-    restart: always
+        - elasticsearch_url=http://11.5.0.6:9200
+        - elasticsearch_hosts=http://11.5.0.6:9200
+    restart: always 
     expose:
       - 5601
     ports:
-      - '5601:5601'
+      - "5601:5601"
     networks:
-      elasticgalax:
-        ipv4_address: 11.5.0.7
+        elasticgalax:
+          ipv4_address: 11.5.0.7
     depends_on:
       - elasticsearch
-  logstash:
-    image: 'logstash:7.9.3'
-    container_name: carburant_logstash
-    environment:
-      - 'elasticsearch_url=http://11.5.0.6:9200'
-      - 'elasticsearch_hosts=http://11.5.0.6:9200'
-    restart: always
-    ports:
-      - '5044:5044'
-      - '5000:5000/tcp'
-      - '5000:5000/udp'
-      - '9600:9600'
-    networks:
-      elasticgalax:
-        ipv4_address: 11.5.0.8
-    depends_on:
-      - elasticsearch
+      
   mysql:
-    image: mysql
+    image : mysql
     container_name: carburant_mysql
-    restart: always
     expose:
-      - 3306
+        - 3306
     ports:
-      - '52004'
+        - "52004"
     networks:
-      elasticgalax:
-        ipv4_address: 11.5.0.4
+        elasticgalax:
+          ipv4_address: 11.5.0.4
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_ROOT_PASSWORD=root
+
   php:
     container_name: carburant_php
-    restart: always
     expose:
-      - 80
+       - 80
     ports:
-      - '80:80'
+       - "80:80"
     networks:
-      elasticgalax:
-        ipv4_address: 11.5.0.3
+        elasticgalax:
+          ipv4_address: 11.5.0.3
     build:
-      context: ./apache-php
-      dockerfile: LAP
+       context: ./apache-php
+       dockerfile: LAP
     depends_on:
       - mysql
+      
+networks:
+    elasticgalax:
+        ipam:
+            driver: default
+            config:
+                 - subnet: 11.5.0.0/24
 volumes:
   esdata1:
     driver: local
-networks:
-  elasticgalax:
-    ipam:
-      driver: default
-      config:
-        - subnet: 11.5.0.0/24
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/drive1/elastic'
