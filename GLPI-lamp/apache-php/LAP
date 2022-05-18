@@ -1,0 +1,60 @@
+# installation a partir de l'image de debian
+
+FROM debian:latest
+
+USER root
+
+# message de bienvenue
+
+RUN echo "Bienvenue dans l'outil de création de limage LAP" \
+&& echo "powered by" \
+&& echo "__/\\\________/\\\________/\\\\\\\\\_        " \
+&& echo " _\/\\\_______\/\\\_____/\\\////////__       " \
+&& echo "  _\/\\\_______\/\\\___/\\\/___________      " \
+&& echo "   _\/\\\\\\\\\\\\\\\__/\\\_____________     " \
+&& echo "    _\/\\\/////////\\\_\/\\\_____________    " \
+&& echo "     _\/\\\_______\/\\\_\//\\\____________   " \
+&& echo "      _\/\\\_______\/\\\__\///\\\__________  " \
+&& echo "       _\/\\\_______\/\\\____\////\\\\\\\\\_ " \
+&& echo "        _\///________\///________\/////////__" \
+&& sleep 5
+
+# installation des packets et creation des repertoires et fichier de logs
+
+RUN apt-get update -yq \
+&& sleep 10 \
+&& apt-get install curl gnupg -yq \
+&& apt-get install apache2 -yq \
+&& apt-get install php -yq \
+&& apt-get install nano -yq \
+&& apt-get install vsftpd -yq \
+&& apt-get install php-mysql -yq \
+&& apt-get install php-curl -yq \
+&& apt-get install php-gd -yq \
+&& apt-get install php-intl -yq \
+&& apt-get install php-xml -yq \
+&& apt-get install php-mbstring -yq \
+&& export DEBIAN_FRONTEND=noninteractive \
+&& apt-get clean -y \
+&& mkdir /var/log/vsftpd && touch /var/log/vsftpd/error.log \
+&& mkdir /var/log/cron && touch /var/log/cron/error.log
+
+# copie des fichier de configuration
+
+RUN mkdir /var/www/html/glpi
+
+COPY apache2.conf etc/apache2/
+COPY startup.sh startup.sh
+COPY glpi /var/www/html/glpi
+COPY php.ini /etc/php/7.4/apache2
+
+# ouverture des ports
+
+EXPOSE 80
+
+# demande d'autostart des packets
+
+RUN chmod 777 /startup.sh
+RUN chmod 777 -R /var/www/html/glpi
+
+CMD ./startup.sh

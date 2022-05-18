@@ -1,0 +1,40 @@
+# installation a partir de l'image de debian
+
+FROM debian:latest
+
+USER root
+
+# message de bienvenue
+
+RUN echo "Bienvenue dans l'outil de création d un container superset maison" \
+&& echo "powered by" \
+&& echo "__/\\\________/\\\________/\\\\\\\\\_        " \
+&& echo " _\/\\\_______\/\\\_____/\\\////////__       " \
+&& echo "  _\/\\\_______\/\\\___/\\\/___________      " \
+&& echo "   _\/\\\\\\\\\\\\\\\__/\\\_____________     " \
+&& echo "    _\/\\\/////////\\\_\/\\\_____________    " \
+&& echo "     _\/\\\_______\/\\\_\//\\\____________   " \
+&& echo "      _\/\\\_______\/\\\__\///\\\__________  " \
+&& echo "       _\/\\\_______\/\\\____\////\\\\\\\\\_ " \
+&& echo "        _\///________\///________\/////////__" \
+&& sleep 5
+
+RUN apt-get update -yq \
+&& sleep 10 \
+&& apt-get install curl gnupg -yq \
+&& apt-get install python pip -yq \
+&& apt-get install build-essential libssl-dev libffi-dev python-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev -yq
+
+RUN pip install --upgrade pip \
+&& pip install markupsafe==2.0.1 \
+&& pip install apache-superset
+
+RUN pip install psycopg2-binary
+
+RUN superset db upgrade \
+&& superset init
+
+RUN export FLASK_APP=superset \
+&& flask fab create-admin --username admin --firstname apache --lastname superset --email apache-superset@fab.com --password admin
+
+CMD superset run --host 0.0.0.0 --port 8088 --reload --with-threads

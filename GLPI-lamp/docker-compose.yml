@@ -1,0 +1,67 @@
+version: "3"
+
+services:
+
+  mysql:
+    container_name: glpi_mysql
+    image: mysql:latest
+    expose:
+      - '3306'
+      - '33060'
+    ports:
+      - '52004:3306'
+      - '52005:33060'
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      glpi_network:
+        ipv4_address: 192.19.0.3
+
+  php:
+    container_name: glpi_php
+    expose:
+      - 80
+    ports:
+      - '8081:80'
+    build:
+      context: ./apache-php
+      dockerfile: LAP
+    depends_on:
+      - php_mysql
+    networks:
+      glpi_network:
+        ipv4_address: 192.19.0.4
+  
+  superset:
+    container_name: glpi_superset
+    expose:
+      - 8088
+    ports:
+      - '8088:8088'
+    build:
+      context: ./superset
+      dockerfile: superset
+    networks:
+      glpi_network:
+        ipv4_address: 192.19.0.2
+
+  postgres:
+    container_name: glpi_postgresql
+    expose:
+      - 5435
+    ports:
+      - '5435:5432'
+    build:
+      context: ./postgres
+      dockerfile: postgres
+    networks:
+      glpi_network:
+        ipv4_address: 192.19.0.5
+  
+networks:
+  glpi_network:
+    ipam:
+      config:
+        - subnet : 192.19.0.0/29
