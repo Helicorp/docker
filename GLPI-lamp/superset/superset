@@ -31,10 +31,9 @@ RUN pip install --upgrade pip \
 
 RUN pip install psycopg2-binary
 
-RUN superset db upgrade \
+RUN export FLASK_APP=superset \
+&& flask fab create-admin --username admin --firstname apache --lastname superset --email apache-superset@fab.com --password admin \
+&& superset db upgrade \
 && superset init
 
-RUN export FLASK_APP=superset \
-&& flask fab create-admin --username admin --firstname apache --lastname superset --email apache-superset@fab.com --password admin
-
-CMD superset run --host 0.0.0.0 --port 8088 --reload --with-threads
+CMD export FLASK_APP=superset && superset run --host 0.0.0.0 --port 8088 --reload --with-threads

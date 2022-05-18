@@ -34,6 +34,10 @@ RUN apt-get update -yq \
 && apt-get install php-intl -yq \
 && apt-get install php-xml -yq \
 && apt-get install php-mbstring -yq \
+&& apt-get install wget -yq \
+&& apt-get install zip -yq \
+&& apt-get install composer -yq \
+&& apt-get install npm -yq \
 && export DEBIAN_FRONTEND=noninteractive \
 && apt-get clean -y \
 && mkdir /var/log/vsftpd && touch /var/log/vsftpd/error.log \
@@ -41,11 +45,12 @@ RUN apt-get update -yq \
 
 # copie des fichier de configuration
 
-RUN mkdir /var/www/html/glpi
+RUN wget https://github.com/glpi-project/glpi/archive/refs/tags/9.5.7.zip \
+&& unzip 9.5.7.zip \
+&& mv glpi-9.5.7 /var/www/html/glpi
 
 COPY apache2.conf etc/apache2/
 COPY startup.sh startup.sh
-COPY glpi /var/www/html/glpi
 COPY php.ini /etc/php/7.4/apache2
 
 # ouverture des ports
@@ -56,5 +61,7 @@ EXPOSE 80
 
 RUN chmod 777 /startup.sh
 RUN chmod 777 -R /var/www/html/glpi
+
+RUN php /var/www/html/glpi/bin/console dependencies install
 
 CMD ./startup.sh
