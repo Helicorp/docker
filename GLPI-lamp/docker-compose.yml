@@ -5,6 +5,8 @@ services:
   mysql:
     container_name: glpi_mysql
     image: mysql:latest
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
     expose:
       - '3306'
       - '33060'
@@ -12,7 +14,8 @@ services:
       - '52004:3306'
       - '52005:33060'
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
+    volumes:
+      - ./mysql/scriptSQL/:/docker-entrypoint-initdb.d/
     environment:
       MYSQL_ROOT_PASSWORD: root
     networks:
@@ -27,9 +30,9 @@ services:
       - '8081:80'
     build:
       context: ./apache-php
-      dockerfile: LAP
+      dockerfile: dockerfile
     depends_on:
-      - php_mysql
+      - mysql
     networks:
       glpi_network:
         ipv4_address: 192.19.0.4
@@ -42,7 +45,7 @@ services:
       - '8088:8088'
     build:
       context: ./superset
-      dockerfile: superset
+      dockerfile: dockerfile
     networks:
       glpi_network:
         ipv4_address: 192.19.0.2
@@ -51,15 +54,38 @@ services:
     container_name: glpi_postgresql
     expose:
       - 5435
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - '5435:5432'
     build:
       context: ./postgres
-      dockerfile: postgres
+      dockerfile: dockerfile
     networks:
       glpi_network:
         ipv4_address: 192.19.0.5
-  
+
+  ocs:
+    container_name: glpi_ocs
+    image: ocsinventory/ocsinventory-docker-image
+    expose :
+      - 80
+      - 443
+    ports:
+      - '8082:80'
+      - '8083:443'
+    environment:
+      - OCS_DB_NAME=ocs
+      - OCS_DB_SERVER=192.19.0.3
+      - OCS_DB_USER=root
+      - OCS_DB_PASS=root
+    depends_on:
+      - mysql
+    networks:
+      glpi_network:
+        ipv4_address: 192.19.0.6
+
 networks:
   glpi_network:
     ipam:
