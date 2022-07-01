@@ -16,6 +16,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./mysql/scriptSQL/:/docker-entrypoint-initdb.d/
+      - MySQLData:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
     networks:
@@ -31,6 +32,8 @@ services:
     build:
       context: ./apache-php
       dockerfile: dockerfile
+    volumes:
+      - PhpData:/var/www/html
     depends_on:
       - mysql
     networks:
@@ -102,7 +105,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.0.0
-    container_name: prometheus
+    container_name: glpi_prometheus
     volumes:
     - ./prometheus/:/etc/prometheus/
     command:
@@ -115,9 +118,33 @@ services:
     - 9090
     ports:
     - "9090:9090"
+    depends_on:
+      - cadvisor
     networks:
       glpi_network:
         ipv4_address: 192.19.0.8
+
+  grafana:
+    image: grafana/grafana:6.2.5
+    container_name: glpi_grafana
+    deploy:
+      replicas: 1
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana-config/provisioning:/etc/grafana/provisioning
+    expose:
+    - 3000
+    ports:
+    - "3000:3000"
+    networks:
+      glpi_network:
+        ipv4_address: 192.19.0.9
+
+volumes:
+  MySQLData:
+  PhpData:
+  grafana-storage:
 
 networks:
   glpi_network:
