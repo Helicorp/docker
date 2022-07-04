@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  cadvisor:
+    container_name: supervision_cadvisor
+    image: gcr.io/cadvisor/cadvisor
+    ports:
+      - 8085:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      supervision_network:
+        ipv4_address: 192.18.0.2
+
+  prometheus:
+    image: prom/prometheus:v2.0.0
+    container_name: supervision_prometheus
+    volumes:
+    - ./prometheus/:/etc/prometheus/
+    command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+    - '--storage.tsdb.path=/prometheus'
+    - '--web.console.libraries=/etc/prometheus/console_libraries'
+    - '--web.console.templates=/etc/prometheus/consoles'
+    - '--storage.tsdb.retention=200h'
+    expose:
+    - 9090
+    ports:
+    - "9090:9090"
+    depends_on:
+      - cadvisor
+    networks:
+      supervision_network:
+        ipv4_address: 192.18.0.3
+
+  grafana:
+    image: grafana/grafana:6.2.5
+    container_name: supervision_grafana
+    deploy:
+      replicas: 1
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana-config/provisioning:/etc/grafana/provisioning
+    expose:
+    - 3000
+    ports:
+    - "3000:3000"
+    networks:
+      supervision_network:
+        ipv4_address: 192.18.0.4
+
+networks:
+  supervision_network:
+    ipam:
+      config:
+        - subnet : 192.18.0.0/28

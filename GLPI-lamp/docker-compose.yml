@@ -39,35 +39,6 @@ services:
     networks:
       glpi_network:
         ipv4_address: 192.19.0.4
-  
-  superset:
-    container_name: glpi_superset
-    expose:
-      - 8088
-    ports:
-      - '8088:8088'
-    build:
-      context: ./superset
-      dockerfile: dockerfile
-    networks:
-      glpi_network:
-        ipv4_address: 192.19.0.2
-
-  postgres:
-    container_name: glpi_postgresql
-    expose:
-      - 5435
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - '5435:5432'
-    build:
-      context: ./postgres
-      dockerfile: dockerfile
-    networks:
-      glpi_network:
-        ipv4_address: 192.19.0.5
 
   ocs:
     container_name: glpi_ocs
@@ -89,62 +60,9 @@ services:
       glpi_network:
         ipv4_address: 192.19.0.6
 
-  cadvisor:
-    container_name: glpi_cadvisor
-    image: gcr.io/cadvisor/cadvisor
-    ports:
-      - 8085:8080
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      glpi_network:
-        ipv4_address: 192.19.0.7
-
-  prometheus:
-    image: prom/prometheus:v2.0.0
-    container_name: glpi_prometheus
-    volumes:
-    - ./prometheus/:/etc/prometheus/
-    command:
-    - '--config.file=/etc/prometheus/prometheus.yml'
-    - '--storage.tsdb.path=/prometheus'
-    - '--web.console.libraries=/etc/prometheus/console_libraries'
-    - '--web.console.templates=/etc/prometheus/consoles'
-    - '--storage.tsdb.retention=200h'
-    expose:
-    - 9090
-    ports:
-    - "9090:9090"
-    depends_on:
-      - cadvisor
-    networks:
-      glpi_network:
-        ipv4_address: 192.19.0.8
-
-  grafana:
-    image: grafana/grafana:6.2.5
-    container_name: glpi_grafana
-    deploy:
-      replicas: 1
-    depends_on:
-      - prometheus
-    volumes:
-      - ./grafana-config/provisioning:/etc/grafana/provisioning
-    expose:
-    - 3000
-    ports:
-    - "3000:3000"
-    networks:
-      glpi_network:
-        ipv4_address: 192.19.0.9
-
 volumes:
   MySQLData:
   PhpData:
-  grafana-storage:
 
 networks:
   glpi_network:

@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  superset:
+    container_name: superset_superset
+    expose:
+      - 8088
+    ports:
+      - '8088:8088'
+    build:
+      context: ./superset
+      dockerfile: dockerfile
+    networks:
+      superset_network:
+        ipv4_address: 192.20.0.3
+
+  postgres:
+    container_name: superset_postgresql
+    expose:
+      - 5435
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5435:5432'
+    build:
+      context: ./postgres
+      dockerfile: dockerfile
+    networks:
+      superset_network:
+        ipv4_address: 192.20.0.2
+
+networks:
+  superset_network:
+    ipam:
+      config:
+        - subnet : 192.20.0.0/28
