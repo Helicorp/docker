@@ -1,0 +1,15 @@
+FROM debian
+
+RUN apt-get update
+RUN apt-get install -qy gcc g++ make libffi-dev cargo npm wget cmake ninja-build git zlib1g-dev build-essential pkg-config libbz2-dev libsqlite3-dev
+RUN wget https://www.python.org/ftp/python/3.10.11/Python-3.10.11.tgz -O /tmp/Python-3.10.11.tgz
+RUN tar zxf /tmp/Python-3.10.11.tgz --directory /etc/
+
+WORKDIR /etc/Python-3.10.11/
+
+RUN ./configure --enable-loadable-sqlite-extensions --enable-optimizations  && make && make install && make clean
+RUN pip3 install --upgrade pip
+
+RUN rm -r /etc/Python-3.10.11/ && rm /tmp/Python-3.10.11.tgz && apt-get clean && apt-get autoclean && apt-get autoremove -y
+
+WORKDIR /
