@@ -1,39 +1,28 @@
-# installation a partir de l'image de debian
+FROM helidebian:python
 
-FROM debian:latest
+ENV port=8088
+ENV address=0.0.0.0
+ENV username=admin
+ENV firstname=admin
+ENV lastname=admin
+ENV email=email@exemple.com
+ENV PATH="$PATH:/home/superset/.local/bin"
 
-USER root
+EXPOSE ${port}
 
-# message de bienvenue
+RUN apt-get install -qy build-essential libssl-dev libffi-dev python3-dev python3-pip libsasl2-dev libldap2-dev default-libmysqlclient-dev && pip install --upgrade setuptools pip virtualenv 
+RUN adduser --disabled-password --shell /bin/bash --gecos "User" superset && mkdir /app && mkdir /app/superset && chown -R superset /app && chmod 744 -R /app
 
-RUN echo "Bienvenue dans l'outil de création d un container superset maison" \
-&& echo "powered by" \
-&& echo "__/\\\________/\\\________/\\\\\\\\\_        " \
-&& echo " _\/\\\_______\/\\\_____/\\\////////__       " \
-&& echo "  _\/\\\_______\/\\\___/\\\/___________      " \
-&& echo "   _\/\\\\\\\\\\\\\\\__/\\\_____________     " \
-&& echo "    _\/\\\/////////\\\_\/\\\_____________    " \
-&& echo "     _\/\\\_______\/\\\_\//\\\____________   " \
-&& echo "      _\/\\\_______\/\\\__\///\\\__________  " \
-&& echo "       _\/\\\_______\/\\\____\////\\\\\\\\\_ " \
-&& echo "        _\///________\///________\/////////__" \
-&& sleep 5
+USER superset
+WORKDIR /app
 
-RUN apt-get update -yq \
-&& sleep 10 \
-&& apt-get install curl gnupg -yq \
-&& apt-get install python pip -yq \
-&& apt-get install build-essential libssl-dev libffi-dev python-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev -yq
+ENV FLASK_APP=superset
+ENV SUPERSET_CONFIG_PATH=/app/superset/config/superset_config.py
 
-RUN pip install --upgrade pip \
-&& pip install markupsafe==2.0.1 \
-&& pip install apache-superset
+RUN python3 -m venv superset && echo ". /app/superset/bin/activate" >> /home/superset/.bashrc
+RUN . superset/bin/activate && pip install apache-superset psycopg2-binary && mkdir /app/superset/config/ && echo "SECRET_KEY = '$(openssl rand -base64 42)'" >> /app/superset/config/superset_config.py
+RUN . superset/bin/activate && superset db upgrade
+COPY password /app/superset/config/
+RUN . superset/bin/activate && superset init && superset fab create-admin --username ${username} --firstname ${firstname} --lastname ${lastname} --email ${email} --password $(cat /app/superset/config/password)
 
-RUN pip install psycopg2-binary
-
-RUN export FLASK_APP=superset \
-&& flask fab create-admin --username admin --firstname apache --lastname superset --email apache-superset@fab.com --password admin \
-&& superset db upgrade \
-&& superset init
-
-CMD export FLASK_APP=superset && superset run --host 0.0.0.0 --port 8088 --reload --with-threads
+CMD ["sh", "-c" , ". superset/bin/activate && superset run -h $address --port $port --with-threads --reload --debugger"]
