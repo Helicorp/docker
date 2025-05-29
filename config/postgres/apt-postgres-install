@@ -30,4 +30,4 @@ for pkg in "$@"; do
 done
 
 # Exécute la commande si tous les paquets sont valides
-exec /usr/bin/apt install "$@"
+exec /usr/bin/apt install --no-install-recommends "$@"
