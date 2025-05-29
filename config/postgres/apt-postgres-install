@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # On parametre pour que la commande psql soit utilisable dans l'environement root
-PSQL_BIN=$(command -v psql)
+PSQL_BIN=/opt/postgres/bin/psql
 
 if [[ -z "$PSQL_BIN" ]]; then
   echo "[ERREUR] psql introuvable dans le PATH de sudo."
