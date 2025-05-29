@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Liste blanche de paquets autorisés
+PG_VERSION=$(psql -V | awk '{print $3}' | cut -d. -f1)
+
+# Liste dynamique des paquets autorisés
+ALLOWED_PACKAGES=(
+  "postgresql"
+  "postgresql-$PG_VERSION"
+  "postgresql-client-$PG_VERSION"
+  "postgresql-contrib-$PG_VERSION"
+  "postgis"
+  "postgis-postgresql-$PG_VERSION"
+  "postgresql-postgis"
+)
+
+for pkg in "$@"; do
+    if [[ ! " ${ALLOWED_PACKAGES[*]} " =~ " ${pkg} " ]]; then
+        echo "[ERREUR] Le paquet '$pkg' n'est pas autorisé."
+        exit 1
+    fi
+done
+
+# Exécute la commande si tous les paquets sont valides
+exec /usr/bin/apt install "$@"
