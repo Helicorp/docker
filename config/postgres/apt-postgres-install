@@ -1,7 +1,15 @@
 #!/bin/bash
 
+# On parametre pour que la commande psql soit utilisable dans l'environement root
+PSQL_BIN=$(command -v psql)
+
+if [[ -z "$PSQL_BIN" ]]; then
+  echo "[ERREUR] psql introuvable dans le PATH de sudo."
+  exit 1
+fi
+
 # Liste blanche de paquets autorisés
-PG_VERSION=$(psql -V | awk '{print $3}' | cut -d. -f1)
+PG_VERSION=$($PSQL_BIN -V | awk '{print $3}' | cut -d. -f1)
 
 # Liste dynamique des paquets autorisés
 ALLOWED_PACKAGES=(
